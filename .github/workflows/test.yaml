@@ -19,18 +19,22 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
 
-      - name: Build image
+      - name: Install testing requirements
         run: |
-          docker build -t jupyter-remote-desktop-proxy .
 
-      - name: Smoke test image
+          pip install -r dev-requirements.txt
+
+          wget https://github.com/vi/websocat/releases/download/v1.12.0/websocat.x86_64-unknown-linux-musl \
+            -O /usr/local/bin/websocat
+          chmod +x /usr/local/bin/websocat
+
+      - name: Run Integration tests
         run: |
-          docker run -d -p 8888:8888 -e JUPYTER_TOKEN=secret jupyter-remote-desktop-proxy
-          sleep 10
-          curl 'http://localhost:8888/desktop/?token=secret' | grep 'Jupyter Remote Desktop Proxy'
-          # Test if the built JS file is present in the image
-          curl 'http://localhost:8888/desktop/dist/viewer.js?token=secret' > /dev/null
+          py.test integration-tests/
 
-      # TODO: Check VNC desktop works, e.g. by comparing Playwright screenshots
+      # TODO: Check if the noVNC rendering works, perhaps by using playwright
       # https://playwright.dev/docs/test-snapshots
