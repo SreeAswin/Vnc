@@ -34,7 +34,7 @@ jobs:
 
       - name: Run Integration tests
         run: |
-          py.test integration-tests/
+          py.test integration-tests/ -s
 
       # TODO: Check if the noVNC rendering works, perhaps by using playwright
       # https://playwright.dev/docs/test-snapshots
